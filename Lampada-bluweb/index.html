@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Iluminação</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      /* imagem ocupa o fundo todo */
+      background: url("https://thumbs.dreamstime.com/z/innovative-thinking-glowing-lightbulb-question-marks-symbolize-creative-ideas-innovative-thinking-glowing-lightbulb-303361439.jpg") 
+                  no-repeat center center fixed;
+      background-size: cover; /* garante que cobre toda a tela */
+      color: white;
+    }
+
+    /* caixa do conteúdo para não misturar com o fundo */
+    .conteudo {
+      background: rgba(0,0,0,0.5); /* escurece um pouco para legibilidade */
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 50px;
+    }
+
+    .knob-container {
+      margin: 30px auto;
+      width: 250px;
+    }
+    input[type=range] {
+      width: 100%;
+    }
+    .estado {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    .lampada {
+      font-size: 80px;
+      color: gray;
+      transition: color 0.3s ease;
+    }
+    .ligada {
+      color: orange;
+    }
+  </style>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    // Configuração Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUjcQoCBNHrBcjKfvXYLiNYPd_QydZnXE",
+      authDomain: "lampada-bluweb.firebaseapp.com",
+      projectId: "lampada-bluweb",
+      storageBucket: "lampada-bluweb.firebasestorage.app",
+      messagingSenderId: "235547289658",
+      appId: "1:235547289658:web:2663bfac8141c3e2362d03",
+      measurementId: "G-88W3SDDXTX"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Atualiza estado da lâmpada em tempo real
+    firebase.database().ref("Quarto/estado").on("value", snapshot => {
+      const valor = snapshot.val();
+      const lampIcon = document.querySelector("#lamp-icon");
+      const estadoTxt = document.querySelector("#estado-led");
+      const slider = document.querySelector("#slider");
+
+      if (valor > 0) {
+        lampIcon.classList.add("ligada");
+        estadoTxt.textContent = `Ligada (${valor}%)`;
+      } else {
+        lampIcon.classList.remove("ligada");
+        estadoTxt.textContent = "Desligada";
+      }
+      slider.value = valor;
+    });
+
+    // Função para enviar valor do slider ao Firebase
+    function mudarIntensidade(valor) {
+      firebase.database().ref("Quarto").set({
+        estado: valor
+      });
+    }
+  </script>
+</head>
+<body>
+  <!-- Conteúdo sobreposto ao fundo -->
+  <div class="conteudo">
+    <h1>💡 Controle remoto de iluminação</h1>
+
+    <!-- Ícone da lâmpada -->
+    <div id="lamp-icon" class="lampada">💡</div>
+
+    <!-- Slider para controle -->
+    <div class="knob-container">
+      <input type="range" id="slider" min="0" max="100" step="10" value="0" oninput="mudarIntensidade(this.value)">
+    </div>
+
+    <p class="estado">Estado: <span id="estado-led">Desligada</span></p>
+  </div>
+</body>
+</html>
